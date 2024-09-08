@@ -9,16 +9,29 @@ class CustomGoogleMaps extends StatefulWidget {
 }
 
 class _CustomGoogleMapsState extends State<CustomGoogleMaps> {
-  
   late CameraPosition initalCameraPosition;
 
   @override
   void initState() {
-    initalCameraPosition = const CameraPosition(target: LatLng(31.06859493521881, 30.432485901908848));
+    initalCameraPosition = const CameraPosition(
+      zoom: 11,
+      target: LatLng(
+        31.220114979528947,
+        29.9469790891334,
+      ),
+    );
     super.initState();
   }
+
   @override
   Widget build(BuildContext context) {
-    return GoogleMap(initialCameraPosition: initalCameraPosition);
+    return GoogleMap(
+        cameraTargetBounds: CameraTargetBounds(
+          LatLngBounds(
+            southwest: const LatLng(31.105385543562797, 29.757157660194444),
+            northeast: const LatLng(31.30889527805763, 30.079535442825954),
+          ),
+        ),
+        initialCameraPosition: initalCameraPosition);
   }
 }
