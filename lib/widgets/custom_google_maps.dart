@@ -22,16 +22,27 @@ class _CustomGoogleMapsState extends State<CustomGoogleMaps> {
     );
     super.initState();
   }
+  late GoogleMapController googleMapController;
+
+  @override
+  void dispose() {
+    googleMapController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return GoogleMap(
-        cameraTargetBounds: CameraTargetBounds(
-          LatLngBounds(
-            southwest: const LatLng(31.105385543562797, 29.757157660194444),
-            northeast: const LatLng(31.30889527805763, 30.079535442825954),
-          ),
-        ),
-        initialCameraPosition: initalCameraPosition);
+      onMapCreated: (controller) {
+        googleMapController = controller;
+      },
+      // cameraTargetBounds: CameraTargetBounds(
+      //   LatLngBounds(
+      //     southwest: const LatLng(31.105385543562797, 29.757157660194444),
+      //     northeast: const LatLng(31.30889527805763, 30.079535442825954),
+      //   ),
+      // ),
+      initialCameraPosition: initalCameraPosition,
+    );
   }
 }
