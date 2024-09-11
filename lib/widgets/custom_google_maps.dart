@@ -10,6 +10,7 @@ class CustomGoogleMaps extends StatefulWidget {
 
 class _CustomGoogleMapsState extends State<CustomGoogleMaps> {
   late CameraPosition initalCameraPosition;
+  Set<Marker> markers = {};
 
   @override
   void initState() {
@@ -20,6 +21,7 @@ class _CustomGoogleMapsState extends State<CustomGoogleMaps> {
         29.9469790891334,
       ),
     );
+    initMarkers();
     super.initState();
   }
 
@@ -36,6 +38,7 @@ class _CustomGoogleMapsState extends State<CustomGoogleMaps> {
     return Stack(
       children: [
         GoogleMap(
+          markers: markers,
           onMapCreated: (controller) {
             googleMapController = controller;
             initMapStyle();
@@ -74,5 +77,10 @@ class _CustomGoogleMapsState extends State<CustomGoogleMaps> {
   void initMapStyle() async {
     var nightMapStyle = await DefaultAssetBundle.of(context).loadString('assets/map_styles/night_map_style.json');
     googleMapController.setMapStyle(nightMapStyle);
+  }
+
+  void initMarkers() {
+    var myMarker = Marker(markerId: MarkerId('1'), position: LatLng(30.702901685192735, 30.171399543883684));
+    markers.add(myMarker);
   }
 }
