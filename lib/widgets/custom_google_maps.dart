@@ -14,7 +14,7 @@ class _CustomGoogleMapsState extends State<CustomGoogleMaps> {
   @override
   void initState() {
     initalCameraPosition = const CameraPosition(
-      zoom: 11,
+      zoom: 10,
       target: LatLng(
         31.220114979528947,
         29.9469790891334,
@@ -22,6 +22,7 @@ class _CustomGoogleMapsState extends State<CustomGoogleMaps> {
     );
     super.initState();
   }
+
   late GoogleMapController googleMapController;
 
   @override
@@ -32,17 +33,46 @@ class _CustomGoogleMapsState extends State<CustomGoogleMaps> {
 
   @override
   Widget build(BuildContext context) {
-    return GoogleMap(
-      onMapCreated: (controller) {
-        googleMapController = controller;
-      },
-      // cameraTargetBounds: CameraTargetBounds(
-      //   LatLngBounds(
-      //     southwest: const LatLng(31.105385543562797, 29.757157660194444),
-      //     northeast: const LatLng(31.30889527805763, 30.079535442825954),
-      //   ),
-      // ),
-      initialCameraPosition: initalCameraPosition,
+    return Stack(
+      children: [
+        GoogleMap(
+          onMapCreated: (controller) {
+            googleMapController = controller;
+            initMapStyle();
+          },
+          // cameraTargetBounds: CameraTargetBounds(
+          //   LatLngBounds(
+          //     southwest: const LatLng(31.105385543562797, 29.757157660194444),
+          //     northeast: const LatLng(31.30889527805763, 30.079535442825954),
+          //   ),
+          // ),
+          initialCameraPosition: initalCameraPosition,
+        ),
+        Positioned(
+          bottom: 100,
+          right: 8,
+          child: IconButton(
+            onPressed: () {
+              googleMapController.animateCamera(
+                CameraUpdate.newLatLngZoom(
+                    const LatLng(30.702901685192735, 30.171399543883684), 10),
+              );
+            },
+            style: const ButtonStyle(
+              backgroundColor: WidgetStatePropertyAll(Colors.white),
+            ),
+            icon: const Icon(
+              Icons.my_location,
+              size: 28,
+            ),
+          ),
+        ),
+      ],
     );
+  }
+
+  void initMapStyle() async {
+    var nightMapStyle = await DefaultAssetBundle.of(context).loadString('assets/map_styles/night_map_style.json');
+    googleMapController.setMapStyle(nightMapStyle);
   }
 }

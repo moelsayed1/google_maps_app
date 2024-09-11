@@ -10,7 +10,10 @@ class TestGoogleMapsWithFlutter extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const CustomGoogleMaps();
+    return const MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: CustomGoogleMaps(),
+    );
   }
 }
 
