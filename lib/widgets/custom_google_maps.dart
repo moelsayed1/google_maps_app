@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_maps_app/models/place_model.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 class CustomGoogleMaps extends StatefulWidget {
@@ -15,7 +16,7 @@ class _CustomGoogleMapsState extends State<CustomGoogleMaps> {
   @override
   void initState() {
     initalCameraPosition = const CameraPosition(
-      zoom: 10,
+      zoom: 12,
       target: LatLng(
         31.220114979528947,
         29.9469790891334,
@@ -75,12 +76,21 @@ class _CustomGoogleMapsState extends State<CustomGoogleMaps> {
   }
 
   void initMapStyle() async {
-    var nightMapStyle = await DefaultAssetBundle.of(context).loadString('assets/map_styles/night_map_style.json');
+    var nightMapStyle = await DefaultAssetBundle.of(context)
+        .loadString('assets/map_styles/night_map_style.json');
     googleMapController.setMapStyle(nightMapStyle);
   }
 
   void initMarkers() {
-    var myMarker = const Marker(markerId: MarkerId('1'), position: LatLng(30.702901685192735, 30.171399543883684));
-    markers.add(myMarker);
+   var myMarkers = places.map(
+      (placeModel) => Marker(
+        position: placeModel.latLng,
+        markerId: MarkerId(
+          placeModel.id.toString(),
+        ),
+      ),
+    ).toSet();
+
+   markers.addAll(myMarkers);
   }
 }
