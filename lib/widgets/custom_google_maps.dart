@@ -1,4 +1,7 @@
+import 'dart:ui' as ui;
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_maps_app/models/place_model.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
@@ -81,17 +84,36 @@ class _CustomGoogleMapsState extends State<CustomGoogleMaps> {
     googleMapController.setMapStyle(nightMapStyle);
   }
 
-  void initMarkers() {
-   var myMarkers = places.map(
-      (placeModel) => Marker(
-        infoWindow: InfoWindow(title: placeModel.name, snippet: placeModel.name),
-        position: placeModel.latLng,
-        markerId: MarkerId(
-          placeModel.id.toString(),
-        ),
-      ),
-    ).toSet();
+  Future<Uint8List> getImageFromRowData(String image, double width) async {
+    var imageData = await rootBundle.load(image);
+    var imageCodec = await ui.instantiateImageCodec(
+        imageData.buffer.asUint8List(),
+        targetWidth: width.round());
+    var imageFrameInfo = await imageCodec.getNextFrame();
+    var imageByteData =
+        await imageFrameInfo.image.toByteData(format: ui.ImageByteFormat.png);
+    return imageByteData!.buffer.asUint8List();
+  }
 
-   markers.addAll(myMarkers);
+  void initMarkers() async {
+    var customMarkerIcon = BitmapDescriptor.bytes(
+      await getImageFromRowData('assets/images/location2.png', 100),
+    );
+    var myMarkers = places
+        .map(
+          (placeModel) => Marker(
+            icon: customMarkerIcon,
+            infoWindow:
+                InfoWindow(title: placeModel.name, snippet: placeModel.name),
+            position: placeModel.latLng,
+            markerId: MarkerId(
+              placeModel.id.toString(),
+            ),
+          ),
+        )
+        .toSet();
+
+    markers.addAll(myMarkers);
+    setState(() {});
   }
 }
