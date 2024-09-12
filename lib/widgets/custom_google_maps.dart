@@ -80,7 +80,7 @@ class _CustomGoogleMapsState extends State<CustomGoogleMaps> {
   }
 
   void initMarkers() {
-    var myMarker = Marker(markerId: MarkerId('1'), position: LatLng(30.702901685192735, 30.171399543883684));
+    var myMarker = const Marker(markerId: MarkerId('1'), position: LatLng(30.702901685192735, 30.171399543883684));
     markers.add(myMarker);
   }
 }
