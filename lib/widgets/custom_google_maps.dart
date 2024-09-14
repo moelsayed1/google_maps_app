@@ -30,11 +30,11 @@ class _CustomGoogleMapsState extends State<CustomGoogleMaps> {
     super.initState();
   }
 
-  late GoogleMapController googleMapController;
+  GoogleMapController? googleMapController;
 
   @override
   void dispose() {
-    googleMapController.dispose();
+    googleMapController!.dispose();
     super.dispose();
   }
 
@@ -62,7 +62,7 @@ class _CustomGoogleMapsState extends State<CustomGoogleMaps> {
           right: 8,
           child: IconButton(
             onPressed: () {
-              googleMapController.animateCamera(
+              googleMapController!.animateCamera(
                 CameraUpdate.newLatLngZoom(
                     const LatLng(30.702901685192735, 30.171399543883684), 10),
               );
@@ -83,7 +83,7 @@ class _CustomGoogleMapsState extends State<CustomGoogleMaps> {
   void initMapStyle() async {
     var nightMapStyle = await DefaultAssetBundle.of(context)
         .loadString('assets/map_styles/night_map_style.json');
-    googleMapController.setMapStyle(nightMapStyle);
+    googleMapController!.setMapStyle(nightMapStyle);
   }
 
   // Future<Uint8List> getImageFromRowData(String image, double width) async {
@@ -102,17 +102,16 @@ class _CustomGoogleMapsState extends State<CustomGoogleMaps> {
         const ImageConfiguration(), 'assets/images/location2.png');
     var myMarkers = places
         .map(
-          (placeModel) =>
-          Marker(
+          (placeModel) => Marker(
             icon: customMarkerIcon,
             infoWindow:
-            InfoWindow(title: placeModel.name, snippet: placeModel.name),
+                InfoWindow(title: placeModel.name, snippet: placeModel.name),
             position: placeModel.latLng,
             markerId: MarkerId(
               placeModel.id.toString(),
             ),
           ),
-    )
+        )
         .toSet();
 
     markers.addAll(myMarkers);
@@ -120,7 +119,6 @@ class _CustomGoogleMapsState extends State<CustomGoogleMaps> {
   }
 
   Future<void> checkAndRequestLocationService() async {
-
     var isServiceEnabled = await location.serviceEnabled();
     if (!isServiceEnabled) {
       isServiceEnabled = await location.requestService();
@@ -141,8 +139,29 @@ class _CustomGoogleMapsState extends State<CustomGoogleMaps> {
     return true;
   }
 
-   getLocationData() {
-    location.onLocationChanged.listen((locationData) {});
+void getLocationData() {
+    location.changeSettings(
+      distanceFilter: 2,
+    );
+    location.onLocationChanged.listen((locationData) async {
+      var myLatitudeData = locationData.latitude!;
+      var myLongtitudeData = locationData.longitude!;
+      var customMarkerIcon = await BitmapDescriptor.asset(
+          const ImageConfiguration(), 'assets/images/location2.png');
+      var cameraPosition = CameraPosition(
+        zoom: 12,
+        target: LatLng(myLatitudeData, myLongtitudeData),
+      );
+      var myLocationMarker = Marker(
+        markerId: const MarkerId('my_location_marker'),
+        position: LatLng(myLatitudeData, myLongtitudeData),
+        icon: customMarkerIcon,
+      );
+      markers.add(myLocationMarker);
+      setState(() {});
+      googleMapController
+          ?.animateCamera(CameraUpdate.newCameraPosition(cameraPosition));
+    });
   }
 
   void updateMyLocation() async {
@@ -151,9 +170,7 @@ class _CustomGoogleMapsState extends State<CustomGoogleMaps> {
 
     if (hasPermission) {
       getLocationData();
-    } else {
-
-    }
+    } else {}
   }
 
 // void initPolygons() {
