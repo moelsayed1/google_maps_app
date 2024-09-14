@@ -125,7 +125,6 @@ class _CustomGoogleMapsState extends State<CustomGoogleMaps> {
     if (!isServiceEnabled) {
       isServiceEnabled = await location.requestService();
     }
-    checkAndRequestLocationPermission();
   }
 
   void checkAndRequestLocationPermission() async {
@@ -136,6 +135,10 @@ class _CustomGoogleMapsState extends State<CustomGoogleMaps> {
         // TODO: Handle this case.
       }
     }
+  }
+
+  void getLocationData() {
+    location.onLocationChanged.listen((locationData) {});
   }
 
 // void initPolygons() {
