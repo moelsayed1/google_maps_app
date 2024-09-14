@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_maps_app/models/place_model.dart';
+import 'package:google_maps_app/utils/location_service.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
 
@@ -12,7 +13,7 @@ class CustomGoogleMaps extends StatefulWidget {
 
 class _CustomGoogleMapsState extends State<CustomGoogleMaps> {
   late CameraPosition initalCameraPosition;
-  late Location location;
+  late LocationService locationService;
   Set<Marker> markers = {};
 
   @override
@@ -24,7 +25,7 @@ class _CustomGoogleMapsState extends State<CustomGoogleMaps> {
         29.9469790891334,
       ),
     );
-    location = Location();
+    locationService = LocationService();
     updateMyLocation();
     initMarkers();
     super.initState();
@@ -118,59 +119,39 @@ class _CustomGoogleMapsState extends State<CustomGoogleMaps> {
     setState(() {});
   }
 
-  Future<void> checkAndRequestLocationService() async {
-    var isServiceEnabled = await location.serviceEnabled();
-    if (!isServiceEnabled) {
-      isServiceEnabled = await location.requestService();
-    }
-  }
-
-  Future<bool> checkAndRequestLocationPermission() async {
-    var permissionStatus = await location.hasPermission();
-    if (permissionStatus == PermissionStatus.deniedForever) {
-      return false;
-    }
-    if (permissionStatus == PermissionStatus.denied) {
-      var permissionStatus = await location.requestPermission();
-      if (permissionStatus != PermissionStatus.granted) {
-        return false;
-      }
-    }
-    return true;
-  }
-
-void getLocationData() {
-    location.changeSettings(
-      distanceFilter: 2,
-    );
-    location.onLocationChanged.listen((locationData) async {
-      var myLatitudeData = locationData.latitude!;
-      var myLongtitudeData = locationData.longitude!;
-      var customMarkerIcon = await BitmapDescriptor.asset(
-          const ImageConfiguration(), 'assets/images/location2.png');
-      var cameraPosition = CameraPosition(
-        zoom: 12,
-        target: LatLng(myLatitudeData, myLongtitudeData),
-      );
-      var myLocationMarker = Marker(
-        markerId: const MarkerId('my_location_marker'),
-        position: LatLng(myLatitudeData, myLongtitudeData),
-        icon: customMarkerIcon,
-      );
-      markers.add(myLocationMarker);
-      setState(() {});
-      googleMapController
-          ?.animateCamera(CameraUpdate.newCameraPosition(cameraPosition));
-    });
-  }
-
   void updateMyLocation() async {
-    await checkAndRequestLocationService();
-    var hasPermission = await checkAndRequestLocationPermission();
+    await locationService.checkAndRequestLocationService();
+    var hasPermission = await locationService.checkAndRequestLocationPermission();
 
     if (hasPermission) {
-      getLocationData();
+      locationService.getRealTimeLocationData((locationData) async {
+        var myLatitudeData = locationData.latitude!;
+        var myLongtitudeData = locationData.longitude!;
+        var customMarkerIcon = await BitmapDescriptor.asset(
+            const ImageConfiguration(), 'assets/images/location2.png');
+        setMyLocationMarker(myLatitudeData, myLongtitudeData, customMarkerIcon);
+        setMyCameraPosition(myLatitudeData, myLongtitudeData);
+      });
     } else {}
+  }
+
+  void setMyCameraPosition(double myLatitudeData, double myLongtitudeData) {
+    var cameraPosition = CameraPosition(
+      zoom: 12,
+      target: LatLng(myLatitudeData, myLongtitudeData),
+    );
+    googleMapController
+        ?.animateCamera(CameraUpdate.newCameraPosition(cameraPosition));
+  }
+
+  void setMyLocationMarker(double myLatitudeData, double myLongtitudeData, AssetMapBitmap customMarkerIcon) {
+    var myLocationMarker = Marker(
+      markerId: const MarkerId('my_location_marker'),
+      position: LatLng(myLatitudeData, myLongtitudeData),
+      icon: customMarkerIcon,
+    );
+    markers.add(myLocationMarker);
+    setState(() {});
   }
 
 // void initPolygons() {
