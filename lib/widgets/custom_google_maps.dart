@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_maps_app/models/place_model.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:location/location.dart';
 
 class CustomGoogleMaps extends StatefulWidget {
   const CustomGoogleMaps({super.key});
@@ -11,8 +12,8 @@ class CustomGoogleMaps extends StatefulWidget {
 
 class _CustomGoogleMapsState extends State<CustomGoogleMaps> {
   late CameraPosition initalCameraPosition;
+  late Location location;
   Set<Marker> markers = {};
-  Set<Circle> circles = {};
 
   @override
   void initState() {
@@ -23,8 +24,9 @@ class _CustomGoogleMapsState extends State<CustomGoogleMaps> {
         29.9469790891334,
       ),
     );
+    location = Location();
+    checkAndRequestLocationService();
     initMarkers();
-    initCircles();
     super.initState();
   }
 
@@ -41,7 +43,6 @@ class _CustomGoogleMapsState extends State<CustomGoogleMaps> {
     return Stack(
       children: [
         GoogleMap(
-          circles: circles,
           zoomControlsEnabled: false,
           markers: markers,
           onMapCreated: (controller) {
@@ -101,44 +102,53 @@ class _CustomGoogleMapsState extends State<CustomGoogleMaps> {
         const ImageConfiguration(), 'assets/images/location2.png');
     var myMarkers = places
         .map(
-          (placeModel) => Marker(
+          (placeModel) =>
+          Marker(
             icon: customMarkerIcon,
             infoWindow:
-                InfoWindow(title: placeModel.name, snippet: placeModel.name),
+            InfoWindow(title: placeModel.name, snippet: placeModel.name),
             position: placeModel.latLng,
             markerId: MarkerId(
               placeModel.id.toString(),
             ),
           ),
-        )
+    )
         .toSet();
 
     markers.addAll(myMarkers);
     setState(() {});
   }
 
-  // void initPolygons() {
-  //   Polygon polygon = Polygon(
-  //     strokeWidth: 2,
-  //     fillColor: Colors.black.withOpacity(0.5),
-  //     polygonId: const PolygonId('1'),
-  //     points: const [
-  //       LatLng(31.23979356459674, 29.96030947711117),
-  //       LatLng(31.188437653678555, 30.00781915870694),
-  //       LatLng(31.16926746229133, 29.93096930030577),
-  //     ],
-  //   );
-  //   polygons.add(polygon);
-  // }
+  void checkAndRequestLocationService() async {
 
-  void initCircles() {
-    Circle circle = Circle(
-      strokeWidth: 2,
-      fillColor: Colors.black.withOpacity(0.5),
-      circleId: const CircleId('1'),
-      radius: 3000,
-      center: const LatLng(31.203374298672102, 29.918813312437376),
-    );
-    circles.add(circle);
+    bool isServiceEnabled = await location.serviceEnabled();
+    if (!isServiceEnabled) {
+      isServiceEnabled = await location.requestService();
+    }
+    checkAndRequestLocationPermission();
   }
+
+  void checkAndRequestLocationPermission() async {
+    var permissionStatus = await location.hasPermission();
+    if (permissionStatus == PermissionStatus.denied) {
+      var permissionStatus = await location.requestPermission();
+      if (permissionStatus != PermissionStatus.granted) {
+        // TODO: Handle this case.
+      }
+    }
+  }
+
+// void initPolygons() {
+//   Polygon polygon = Polygon(
+//     strokeWidth: 2,
+//     fillColor: Colors.black.withOpacity(0.5),
+//     polygonId: const PolygonId('1'),
+//     points: const [
+//       LatLng(31.23979356459674, 29.96030947711117),
+//       LatLng(31.188437653678555, 30.00781915870694),
+//       LatLng(31.16926746229133, 29.93096930030577),
+//     ],
+//   );
+//   polygons.add(polygon);
+// }
 }
