@@ -25,7 +25,7 @@ class _CustomGoogleMapsState extends State<CustomGoogleMaps> {
       ),
     );
     location = Location();
-    checkAndRequestLocationService();
+    updateMyLocation();
     initMarkers();
     super.initState();
   }
@@ -119,26 +119,41 @@ class _CustomGoogleMapsState extends State<CustomGoogleMaps> {
     setState(() {});
   }
 
-  void checkAndRequestLocationService() async {
+  Future<void> checkAndRequestLocationService() async {
 
-    bool isServiceEnabled = await location.serviceEnabled();
+    var isServiceEnabled = await location.serviceEnabled();
     if (!isServiceEnabled) {
       isServiceEnabled = await location.requestService();
     }
   }
 
-  void checkAndRequestLocationPermission() async {
+  Future<bool> checkAndRequestLocationPermission() async {
     var permissionStatus = await location.hasPermission();
+    if (permissionStatus == PermissionStatus.deniedForever) {
+      return false;
+    }
     if (permissionStatus == PermissionStatus.denied) {
       var permissionStatus = await location.requestPermission();
       if (permissionStatus != PermissionStatus.granted) {
-        // TODO: Handle this case.
+        return false;
       }
     }
+    return true;
   }
 
-  void getLocationData() {
+   getLocationData() {
     location.onLocationChanged.listen((locationData) {});
+  }
+
+  void updateMyLocation() async {
+    await checkAndRequestLocationService();
+    var hasPermission = await checkAndRequestLocationPermission();
+
+    if (hasPermission) {
+      getLocationData();
+    } else {
+
+    }
   }
 
 // void initPolygons() {
