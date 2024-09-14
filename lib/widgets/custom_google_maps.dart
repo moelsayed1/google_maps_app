@@ -12,6 +12,7 @@ class CustomGoogleMaps extends StatefulWidget {
 class _CustomGoogleMapsState extends State<CustomGoogleMaps> {
   late CameraPosition initalCameraPosition;
   Set<Marker> markers = {};
+  Set<Circle> circles = {};
 
   @override
   void initState() {
@@ -23,6 +24,7 @@ class _CustomGoogleMapsState extends State<CustomGoogleMaps> {
       ),
     );
     initMarkers();
+    initCircles();
     super.initState();
   }
 
@@ -39,6 +41,7 @@ class _CustomGoogleMapsState extends State<CustomGoogleMaps> {
     return Stack(
       children: [
         GoogleMap(
+          circles: circles,
           zoomControlsEnabled: false,
           markers: markers,
           onMapCreated: (controller) {
@@ -94,7 +97,8 @@ class _CustomGoogleMapsState extends State<CustomGoogleMaps> {
   // }
 
   void initMarkers() async {
-    var customMarkerIcon = await BitmapDescriptor.asset(const ImageConfiguration(), 'assets/images/location2.png');
+    var customMarkerIcon = await BitmapDescriptor.asset(
+        const ImageConfiguration(), 'assets/images/location2.png');
     var myMarkers = places
         .map(
           (placeModel) => Marker(
@@ -111,5 +115,30 @@ class _CustomGoogleMapsState extends State<CustomGoogleMaps> {
 
     markers.addAll(myMarkers);
     setState(() {});
+  }
+
+  // void initPolygons() {
+  //   Polygon polygon = Polygon(
+  //     strokeWidth: 2,
+  //     fillColor: Colors.black.withOpacity(0.5),
+  //     polygonId: const PolygonId('1'),
+  //     points: const [
+  //       LatLng(31.23979356459674, 29.96030947711117),
+  //       LatLng(31.188437653678555, 30.00781915870694),
+  //       LatLng(31.16926746229133, 29.93096930030577),
+  //     ],
+  //   );
+  //   polygons.add(polygon);
+  // }
+
+  void initCircles() {
+    Circle circle = Circle(
+      strokeWidth: 2,
+      fillColor: Colors.black.withOpacity(0.5),
+      circleId: const CircleId('1'),
+      radius: 3000,
+      center: const LatLng(31.203374298672102, 29.918813312437376),
+    );
+    circles.add(circle);
   }
 }
